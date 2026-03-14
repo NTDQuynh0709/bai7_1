@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -14,16 +7,27 @@ const Stack = createNativeStackNavigator();
 
 function SignInScreen({ navigation }) {
   const [phone, setPhone] = useState('');
+  const [error, setError] = useState('');
+
+  const phoneRegex = /^0\d{9}$/;
+
+  const handlePhoneChange = (text) => {
+    setPhone(text);
+
+    if (text.trim() === '') {
+      setError('Vui lòng nhập số điện thoại');
+    } else if (!phoneRegex.test(text)) {
+      setError('Số điện thoại không đúng định dạng');
+    } else {
+      setError('');
+    }
+  };
 
   const handleContinue = () => {
-    const phoneRegex = /^0\d{9}$/;
-
-    if (phone.trim() === '') {
-      Alert.alert('Thông báo', 'Vui lòng nhập số điện thoại');
-    } else if (!phoneRegex.test(phone)) {
-      Alert.alert('Thông báo', 'Số điện thoại không đúng định dạng');
-    } else {
+    if (error === '' && phone !== '') {
       navigation.navigate('Home');
+    } else {
+      Alert.alert('Thông báo', error);
     }
   };
 
@@ -41,10 +45,22 @@ function SignInScreen({ navigation }) {
         placeholder="Nhập số điện thoại của bạn"
         keyboardType="phone-pad"
         value={phone}
-        onChangeText={setPhone}
+        onChangeText={handlePhoneChange}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleContinue}>
+      {error !== '' && (
+        <Text style={{ color: 'red', marginBottom: 20 }}>
+          {error}
+        </Text>
+      )}
+
+      <TouchableOpacity
+        style={[
+          styles.button,
+          { backgroundColor: error === '' && phone !== '' ? '#007bff' : '#d9d9d9' }
+        ]}
+        onPress={handleContinue}
+      >
         <Text style={styles.buttonText}>Tiếp tục</Text>
       </TouchableOpacity>
     </View>
@@ -54,7 +70,7 @@ function SignInScreen({ navigation }) {
 function HomeScreen() {
   return (
     <View style={styles.homeContainer}>
-      <Text style={styles.homeText}>Chào mừng bạn đến Trang chủ</Text>
+      <Text style={styles.homeText}>Trang chủ</Text>
     </View>
   );
 }
@@ -62,7 +78,7 @@ function HomeScreen() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
+      <Stack.Navigator>
         <Stack.Screen
           name="SignIn"
           component={SignInScreen}
@@ -104,26 +120,24 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     fontSize: 18,
     paddingVertical: 10,
-    marginBottom: 40,
+    marginBottom: 10,
   },
   button: {
-    backgroundColor: '#d9d9d9',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
     fontSize: 22,
-    color: '#555',
+    color: '#fff',
   },
   homeContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   homeText: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
   },
 });
